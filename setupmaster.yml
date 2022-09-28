@@ -4,19 +4,18 @@
   vars:
    source: "mastermysqld.conf"
   tasks:
-  - name: Vérifier l'existence de mysqld.conf
+  - name: Vérifier l'existence de mysqld.cnf
     ansible.builtin.stat:
-     path: "/etc/mysql/mysql.conf.d/mysqld.conf"
-     register: check_file_name
-  - name: Check debug
-    ansible.builtin.debug:
-     var: check_file_name
+     path: "/etc/mysql/mysql.conf.d/mysqld.cnf"
+    register: mysqld
+  - name: Si existe, backup
+    command: mv /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf.old
+    when: mysqld.stat.exists
   - name: Copie de la conf
     ansible.builtin.copy:
      remote_src: false
      src: "mastermysqld.conf"
-     dest: "/etc/mysql/mysql.conf.d/mysqld.conf"
-    when: check_file_name.stats.exists
+     dest: "/etc/mysql/mysql.conf.d/mysqld.cnf"
   - name: Redémarrer le service
     systemd:
      name: mysql
