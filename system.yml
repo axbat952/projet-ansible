@@ -1,6 +1,10 @@
 - hosts: all
   become: yes
   tasks:
+   - name: Mise à jour des paquets
+     apt:
+      upgrade: yes
+      update_cache: yes
    - name: Création utilisateur ansible
      user:
        name: ansible 
@@ -36,7 +40,7 @@
      ansible.builtin.service:
       name: rsyslog
       enabled: yes
-   
+
    - name: Configuration RSyslog
      template:
        src: templates/syslogconfclient.j2
