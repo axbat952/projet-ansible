@@ -1,0 +1,24 @@
+---
+- hosts: 172.16.102.192
+  become: true
+  vars:
+   source: "mastermysqld.conf"
+  tasks:
+  - name: Vérifier l'existence de mysqld.conf
+    ansible.builtin.stat:
+     path: "/etc/mysql/mysql.conf.d/mysqld.conf"
+     register: check_file_name
+  - name: Check debug
+    ansible.builtin.debug:
+     var: check_file_name
+  - name: Copie de la conf
+    ansible.builtin.copy:
+     remote_src: false
+     src: "mastermysqld.conf"
+     dest: "/etc/mysql/mysql.conf.d/mysqld.conf"
+    when: check_file_name.stats.exists
+  - name: Redémarrer le service
+    systemd:
+     name: mysql
+     state: restarted
+     enabled: yes
