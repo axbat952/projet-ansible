@@ -1,0 +1,27 @@
+---
+- hosts: all
+  become: true
+  tasks:
+  - name: Mise à jour des paquets
+    apt:
+     upgrade: yes
+     update_cache: yes
+  - name: Installation de SQL8
+    apt:
+     name:
+      - mysql-server
+      - python3
+      - python3-pip
+      - gcc
+     state: latest
+  - name: Installation des modules pip
+    pip:
+     name:
+      - PyMySQL
+     state: present
+     executable: pip3
+  - name: Activer mysql et l'exécuter au démarrage
+    systemd:
+     name: mysql
+     state: started
+     enabled: yes
