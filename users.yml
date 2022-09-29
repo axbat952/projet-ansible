@@ -2,23 +2,8 @@
   hosts: web
   gather_facts: false
   vars_files:
-    - password.yml
-  vars:
-    client:
-      - username: client1
-        domain: client1.com
-        password: "{{client1}}"
-        home: /var/www/client1.com
-      
-      - username: client2
-        domain: client2.com
-        password: "{{client2}}"
-        home: /var/www/client2.com
-
-      - username: client3
-        domain: client3.com
-        password: "{{client3}}"
-        home: /var/www/client3.com
+    - Vault/password.yml
+    - WordPress_LAMP/vars/user_vars.yml
 
   tasks:
     - name: Ajout user apache avec password Vault

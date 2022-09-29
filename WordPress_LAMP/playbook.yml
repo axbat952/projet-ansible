@@ -1,25 +1,23 @@
+##################################################
+# DO Community Playbooks: LAMP on Ubuntu 18.04
+##################################################
 ---
-- hosts: all
+- hosts: web
   become: true
   vars_files:
     - vars/default.yml
+    - vars/user_vars.yml
 
   tasks:
     - name: Install prerequisites
-      apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
-      tags: [ system ]
+      apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
+      loop: [ 'aptitude' ]
 
+  #Apache Configuration
     - name: Install LAMP Packages
       apt: name={{ item }} update_cache=yes state=latest
       loop: [ 'apache2', 'mysql-server', 'python3-pymysql', 'php', 'php-mysql', 'libapache2-mod-php' ]
-      tags: [ system ]
 
-    - name: Install PHP Extensions
-      apt: name={{ item }} update_cache=yes state=latest
-      loop: "{{ php_modules }}"
-      tags: [ system ]
-
-  # Apache Configuration
     - name: Create document root
       file:
         path: "/var/www/{{ http_host }}"
@@ -29,69 +27,123 @@
         mode: '0755'
       tags: [ apache ]
 
-    - name: Set up Apache VirtualHost
+    - name: Set up Apache virtualhost
       template:
         src: "files/apache.conf.j2"
         dest: "/etc/apache2/sites-available/{{ http_conf }}"
       notify: Reload Apache
-      tags: [ apache ]
-
-    - name: Enable rewrite module
-      shell: /usr/sbin/a2enmod rewrite
-      notify: Reload Apache
-      tags: [ apache ]
 
     - name: Enable new site
       shell: /usr/sbin/a2ensite {{ http_conf }}
       notify: Reload Apache
-      tags: [ apache ]
-
-    - name: Disable default Apache site
-      shell: /usr/sbin/a2dissite 000-default.conf
-      notify: Restart Apache
-      tags: [ apache ]
 
   # MySQL Configuration
-    - name: Set the root password
-      mysql_user:
-        name: root
-        password: "{{ mysql_root_password }}"
-        login_unix_socket: /var/run/mysqld/mysqld.sock
-      tags: [ mysql, mysql-root ]
 
-    - name: Remove all anonymous user accounts
-      mysql_user:
-        name: ''
-        host_all: yes
-        state: absent
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-      tags: [ mysql ]
+    # # create root .my.cnf config file
+    # - name: Add .my.cnf
+    #   template: src=vars/my.cnf.j2 dest=/root/.my.cnf owner=root group=root mode=0600
+    #   tags: [ mysql ]
 
-    - name: Remove the MySQL test database
-      mysql_db:
-        name: test
-        state: absent
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-      tags: [ mysql ]
+    # # Set root password
+    # # UPDATE mysql.user SET Password=PASSWORD('mysecret') WHERE User='root';
+    # # FLUSH PRIVILEGES;
 
-    - name: Creates database for WordPress
-      mysql_db:
-        name: "{{ mysql_db }}"
-        state: present
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-      tags: [ mysql ]
+    # - name: Set root Password
+    #   mysql_user: login_password={{ mysql_root_password }} check_implicit_admin=yes name=root host={{ item }} password={{ mysql_root_password }} state=present 
+    #   with_items:
+    #     - localhost
+    #     - 127.0.0.1
+    #     - ::1
+    #   tags: [ mysql ]
 
-    - name: Create MySQL user for WordPress
-      mysql_user:
-        name: "{{ mysql_user }}"
-        password: "{{ mysql_password }}"
-        priv: "{{ mysql_db }}.*:ALL"
-        state: present
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
+    # - name: Reload privilege tables
+    #   command: 'mysql -ne "{{ item }}"'
+    #   with_items:
+    #     - FLUSH PRIVILEGES
+    #   changed_when: False
+    #   tags: [ mysql ]
+
+    # - name: Remove anonymous users
+    #   command: 'mysql -ne "{{ item }}"'
+    #   with_items:
+    #     - DELETE FROM mysql.user WHERE User=''
+    #   changed_when: False
+    #   tags: [ mysql ]
+
+    # - name: Disallow root login remotely
+    #   command: 'mysql -ne "{{ item }}"'
+    #   with_items:
+    #     - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')
+    #   changed_when: False
+    #   tags: [ mysql ]
+
+    # - name: Remove test database and access to it
+    #   command: 'mysql -ne "{{ item }}"'
+    #   with_items:
+    #     - DROP DATABASE IF EXISTS test
+    #     - DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'
+    #   changed_when: False
+    #   tags: [ mysql ]
+
+    # - name: Reload privilege tables
+    #   command: 'mysql -ne "{{ item }}"'
+    #   with_items:
+    #     - FLUSH PRIVILEGES
+    #   changed_when: False
+    #   tags: [ mysql ]
+
+
+    # # - name: Set MySQL root Password
+    # #   mysql_user:
+    # #     login_host: 'localhost'
+    # #     login_user: 'root'
+    # #     login_password: ''
+    # #     name: 'root'
+    # #     password: '{{ mysql_root_password }}'
+    # #     state: present
+    # #   tags: [ mysql ]
+ 
+    # - name: Create MySQL user for WordPress
+    #   mysql_user:
+    #     name: "{{ mysql_user }}"
+    #     password: "{{ mysql_password }}"
+    #     priv: "{{ mysql_db }}.*:ALL"
+    #     state: present
+    #     login_user: root
+    #     login_password: "{{ mysql_root_password }}"
+    #   tags: [ mysql ]
+
+    # - name: Creates database for WordPress
+    #   mysql_db:
+    #     name: "{{ mysql_db }}"
+    #     state: present
+    #     login_user: root
+    #     login_password: "{{ mysql_root_password }}"
+    #   tags: [ mysql ]
+
+
+    # - name: Sets the root password
+    #   mysql_user:
+    #     name: root
+    #     password: "{{ mysql_root_password }}"
+    #     login_unix_socket: /var/run/mysqld/mysqld.sock
+    #   tags: [ mysql ]
+
+    # # - name: Removes all anonymous user accounts
+    # #   mysql_user:
+    # #     name: ''
+    # #     host_all: yes
+    # #     state: absent
+    # #     login_user: root
+    # #     login_password: "{{ mysql_root_password }}"
+    # #   tags: [ mysql ]
+
+    # - name: Removes the MySQL test database
+    #   mysql_db:
+    #     name: test
+    #     state: absent
+    #     login_user: root
+    #     login_password: "{{ mysql_root_password }}"
       tags: [ mysql ]
 
   # UFW Configuration
@@ -100,39 +152,12 @@
         rule: allow
         port: "{{ http_port }}"
         proto: tcp
-      tags: [ system ]
 
-  # WordPress Configuration
-    - name: Download and unpack latest WordPress
-      unarchive:
-        src: https://wordpress.org/latest.tar.gz
-        dest: "/var/www/{{ http_host }}"
-        remote_src: yes
-        creates: "/var/www/{{ http_host }}/wordpress"
-      tags: [ wordpress ]
-
-    - name: Set ownership
-      file:
-        path: "/var/www/{{ http_host }}"
-        state: directory
-        recurse: yes
-        owner: www-data
-        group: www-data
-      tags: [ wordpress ]
-
-    - name: Set permissions for directories
-      shell: "/usr/bin/find /var/www/{{ http_host }}/wordpress/ -type d -exec chmod 750 {} \\;"
-      tags: [ wordpress ]
-
-    - name: Set permissions for files
-      shell: "/usr/bin/find /var/www/{{ http_host }}/wordpress/ -type f -exec chmod 640 {} \\;"
-      tags: [ wordpress ]
-
-    - name: Set up wp-config
+  # PHP Info Page
+    - name: Sets Up PHP Info Page
       template:
-        src: "files/wp-config.php.j2"
-        dest: "/var/www/{{ http_host }}/wordpress/wp-config.php"
-      tags: [ wordpress ]
+        src: "files/info.php.j2"
+        dest: "/var/www/{{ http_host }}/info.php"
 
   handlers:
     - name: Reload Apache
