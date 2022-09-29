@@ -6,14 +6,15 @@
         - hosts: 127.0.0.1
         - root_db_password: root
   tasks:
-      - name: Add root user and replication rights
+      - name: Add root user 
         community.mysql.mysql_user:
          name: root
          host: 127.0.0.1
          login_unix_socket: /var/run/mysqld/mysqld.sock
-         password: test
-         priv: "*.*:REPLICATION CLIENT"
+         password: root
+         priv: "*.*:ALL"
          check_implicit_admin: true
+         state: present
         loop: "{{ mysql }}"
         become: yes
         notify: "restart mysql"
@@ -29,7 +30,16 @@
       - name: Correct root user parameters
         become: yes
         command: mysql --execute "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';"
+       
+      - name: Create user with replication rights
+        become: yes
+        community.mysql.mysql_user:
+         name: olivier
+         password: "12345"
+         priv: "*.*:ALL"
+         state: present
 
+        
   handlers:
    - name: Restart mysql
      ansible.builtin.service:
