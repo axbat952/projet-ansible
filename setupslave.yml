@@ -1,5 +1,5 @@
 ---
-- hosts: 172.16.102.194
+- hosts: slave
   become: true
   vars:
    source: "slavemysqld.conf"
