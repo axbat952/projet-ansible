@@ -1,15 +1,10 @@
-- hosts: all
+- hosts: syslog
   become: true
   tasks:
    - name: Installation RSyslog
      apt:
       name: rsyslog
       state: present
-
-   - name: Démarrage service RSyslog si non démarré
-     ansible.builtin.service:
-      name: rsyslog
-      state: started
 
    - name: Activation service RSyslog au démarrage du système
      ansible.builtin.service:
