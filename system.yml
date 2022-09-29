@@ -22,3 +22,23 @@
         user: ansible
         state: present
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+   - name: Installation RSyslog
+     apt:
+      name: rsyslog
+      state: present
+
+   - name: Démarrage service RSyslog si non démarré
+     ansible.builtin.service:
+      name: rsyslog
+      state: started
+
+   - name: Activation service RSyslog au démarrage du système
+     ansible.builtin.service:
+      name: rsyslog
+      enabled: yes
+   
+   - name: Configuration RSyslog
+     template:
+       src: templates/syslogconfclient.j2
+       dest: /etc/rsyslog.conf
+     notify: restart rsyslog
