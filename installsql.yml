@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: master,slave
   become: true
   tasks:
   - name: Installation de SQL8

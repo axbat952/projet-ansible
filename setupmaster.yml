@@ -1,5 +1,5 @@
 ---
-- hosts: 172.16.102.192
+- hosts: master
   become: true
   vars:
    source: "mastermysqld.conf"
