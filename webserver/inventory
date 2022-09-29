@@ -12,4 +12,9 @@ all:
             hosts: 
                 192.168.148.135:
                 192.168.148.134:
-                    ansible_ssh_user: ansible
+                    ansible_ssh_user: root
+                    vars:
+                        - ansible_python_interpreter=/usr/bin/python3
+        haproxy:
+              hosts:
+                192.168.148.137:

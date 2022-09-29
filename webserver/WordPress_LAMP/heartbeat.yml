@@ -1,8 +1,13 @@
- - name: install 
-   hosts: web
-   become: true
-   tasks: 
-    - name: Ansible apt install heartbeat
-      apt:
-        name: heartbeat
-        state: present
+- name: install 
+  hosts: web
+  become: true
+  tasks: 
+  - name: Ansible apt install heartbeat
+    apt:
+      name: heartbeat
+      state: present
+
+- name: Touch the same file, but add/remove some permissions
+  ansible.builtin.file:
+    path: /etc/ha.d/ha.cf
+    state: touch

@@ -1,5 +1,32 @@
-- name: heartbeat
-  hosts: web
-  gather_facts: yes
+- hosts: web
+  vars:
+    heartbeat_package_state: latest
+    heartbeat_conf_manage: yes
+    heartbeat_conf:
+      heartbeat:
+        monitors:
+          - type: http
+            schedule: '*/1 * * * * * *'
+            urls:
+              - "http://client1"
+              - "http://client2"
+              - "http://client3"
+      output:
+        elasticsearch:
+          enabled: true
+          hosts:
+            - http://192.168.148.134:9200
+            - http://192.168.148.135:9200
+      setup:
+        dashboards:
+          enabled: true
+          beat: heartbeat
+          always_kibana: true
+        template:
+          enabled: true
+        kibana:
+          host: 
+            - http://192.168.148.134/kibana:80
+            - http://192.168.148.135/kibana:80
   roles:
-    - apolloclark.heartbeat
+     - role: nephelaiio.heartbeat

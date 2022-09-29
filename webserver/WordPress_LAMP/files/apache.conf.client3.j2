@@ -1,0 +1,19 @@
+<VirtualHost *:8880>
+    ServerAdmin axel.ribot@edu.itescia.fr
+    ServerName client3
+    ServerAlias client3.com
+    DocumentRoot /var/www/client3.com/wordpress
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    <Directory /var/www/client3.com>
+          Options -Indexes
+          AllowOverride All
+          Require all granted
+    </Directory>
+
+    <IfModule mod_dir.c>
+        DirectoryIndex index.php index.html index.cgi index.pl  index.xhtml index.htm
+    </IfModule>
+
+</VirtualHost>

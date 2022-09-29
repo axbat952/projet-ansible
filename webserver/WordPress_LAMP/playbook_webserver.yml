@@ -5,7 +5,7 @@
     - vars/user_vars.yml
 
   tasks:
-    - name: Install prerequisites
+    - name: Install prerequis
       apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
       loop: [ 'aptitude' ]
 
@@ -21,18 +21,51 @@
 
     - name: Create document root
       file:
-        path: "/var/www/{{ http_host }}"
+        path: "/var/www/{{ item.domain }}"
         state: directory
-        owner: "www-data"
-        group: "www-data"
+        owner: "{{item.user}}"
+        #group: "www-data"
         mode: '0755'
-      tags: [ apache ]
+      with_items: 
+        - {domain: client1.com, user: client1}
+        - {domain: client2.com, user: client2}
+        - {domain: client3.com, user: client3} 
+      tags: [ apache]
 
     - name: Set up Apache virtualhost
       template:
-        src: "files/apache.conf.j2"
-        dest: "/etc/apache2/sites-available/{{ http_conf }}"
+        src: "{{item.src}}"
+        dest: "{{item.dest}}"
+      with_items:
+        - { src: 'files/apache.conf.client1.j2', dest: "/etc/apache2/sites-available/client1.com.conf" }
+        - { src: 'files/apache.conf.client2.j2', dest: "/etc/apache2/sites-available/client2.com.conf" }
+        - { src: 'files/apache.conf.client3.j2', dest: "/etc/apache2/sites-available/client3.com.conf" }
       notify: Reload Apache
+      tags: [ apache ]
+
+    - name: apache2 listen on port 8080
+      lineinfile:
+        dest: /etc/apache2/ports.conf
+        line: "Listen 8080"
+      notify:
+        - Reload Apache
+      tags: [ apache_port ]     
+
+    - name: apache2 listen on port 8880
+      lineinfile:
+        dest: /etc/apache2/ports.conf
+        line: "Listen 8880"
+      notify:
+        - Reload Apache
+      tags: [ apache_port ]
+
+    - name: apache2 listen on port 9200
+      lineinfile:
+        dest: /etc/apache2/ports.conf
+        line: "Listen 9200"
+      notify:
+        - Reload Apache
+      tags: [ apache_port ]              
 
     - name: Enable rewrite module
       shell: /usr/sbin/a2enmod rewrite
@@ -40,8 +73,12 @@
       tags: [ apache ]
 
     - name: Enable new site
-      shell: /usr/sbin/a2ensite {{ http_conf }}
+      shell: /usr/sbin/a2ensite {{ item.conf}}
       notify: Reload Apache
+      with_items: 
+      - {conf: client1.com.conf}
+      - {conf: client2.com.conf}
+      - {conf: client3.com.conf} 
       tags: [ apache ]
 
     - name: Disable default Apache site
@@ -61,81 +98,81 @@
       template: src=vars/my.cnf.j2 dest=/root/.my.cnf owner=root group=root mode=0600
       tags: [ mysql ]
 
-    - name: Reload privilege tables
-      command: 'mysql -ne "{{ item }}"'
-      with_items:
-        - FLUSH PRIVILEGES
-      changed_when: False
-      tags: [ mysql ]
-
-    - name: Remove test database and access to it
-      command: 'mysql -ne "{{ item }}"'
-      with_items:
-        - DROP DATABASE IF EXISTS test
-        - DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'
-      changed_when: False
-      tags: [ mysql ]
-
-    - name: Reload privilege tables
-      command: 'mysql -ne "{{ item }}"'
-      with_items:
-        - FLUSH PRIVILEGES
-      changed_when: False
-      tags: [ mysql ]
-
-
-    # - name: Set MySQL root Password
-    #   mysql_user:
-    #     login_host: 'localhost'
-    #     login_user: 'root'
-    #     login_password: ''
-    #     name: 'root'
-    #     password: '{{ mysql_root_password }}'
-    #     state: present
+    # - name: Reload privilege tables
+    #   command: 'mysql -ne "{{ item }}"'
+    #   with_items:
+    #     - FLUSH PRIVILEGES
+    #   changed_when: False
     #   tags: [ mysql ]
+
+    # - name: Remove test database and access to it
+    #   command: 'mysql -ne "{{ item }}"'
+    #   with_items:
+    #     - DROP DATABASE IF EXISTS test
+    #     - DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'
+    #   changed_when: False
+    #   tags: [ mysql ]
+
+    # - name: Reload privilege tables
+    #   command: 'mysql -ne "{{ item }}"'
+    #   with_items:
+    #     - FLUSH PRIVILEGES
+    #   changed_when: False
+    #   tags: [ mysql ]
+
+
+    # # - name: Set MySQL root Password
+    # #   mysql_user:
+    # #     login_host: 'localhost'
+    # #     login_user: 'root'
+    # #     login_password: ''
+    # #     name: 'root'
+    # #     password: '{{ mysql_root_password }}'
+    # #     state: present
+    # #   tags: [ mysql ]
  
-    - name: Create MySQL user for WordPress
-      mysql_user:
-        name: "{{ mysql_user }}"
-        password: "{{ mysql_password }}"
-        priv: "{{ mysql_db }}.*:ALL"
-        state: present
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-      tags: [ mysql ]
-
-    - name: Creates database for WordPress
-      mysql_db:
-        name: "{{ mysql_db }}"
-        state: present
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-      tags: [ mysql ]
-
-
-    - name: Sets the root password
-      mysql_user:
-        name: root
-        password: "{{ mysql_root_password }}"
-        login_unix_socket: /var/run/mysqld/mysqld.sock
-      tags: [ mysql ]
-
-    # - name: Removes all anonymous user accounts
+    # - name: Create MySQL user for WordPress
     #   mysql_user:
-    #     name: ''
-    #     host_all: yes
-    #     state: absent
+    #     name: "{{ mysql_user }}"
+    #     password: "{{ mysql_password }}"
+    #     priv: "{{ mysql_db }}.*:ALL"
+    #     state: present
     #     login_user: root
     #     login_password: "{{ mysql_root_password }}"
     #   tags: [ mysql ]
 
-    - name: Removes the MySQL test database
-      mysql_db:
-        name: test
-        state: absent
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-      tags: [ mysql ]
+    # - name: Creates database for WordPress
+    #   mysql_db:
+    #     name: "{{ mysql_db }}"
+    #     state: present
+    #     login_user: root
+    #     login_password: "{{ mysql_root_password }}"
+    #   tags: [ mysql ]
+
+
+    # - name: Sets the root password
+    #   mysql_user:
+    #     name: root
+    #     password: "{{ mysql_root_password }}"
+    #     login_unix_socket: /var/run/mysqld/mysqld.sock
+    #   tags: [ mysql ]
+
+    # # - name: Removes all anonymous user accounts
+    # #   mysql_user:
+    # #     name: ''
+    # #     host_all: yes
+    # #     state: absent
+    # #     login_user: root
+    # #     login_password: "{{ mysql_root_password }}"
+    # #   tags: [ mysql ]
+
+    # - name: Removes the MySQL test database
+    #   mysql_db:
+    #     name: test
+    #     state: absent
+    #     login_user: root
+    #     login_password: "{{ mysql_root_password }}"
+    #   tags: [ mysql ]
 
   # UFW Configuration
     - name: "UFW - Allow HTTP on port {{ http_port }}"
@@ -143,37 +180,71 @@
         rule: allow
         port: "{{ http_port }}"
         proto: tcp
+      tags: [port]
+
+    - name: "UFW - Allow HTTP on port 8080"
+      ufw:
+        rule: allow
+        port: "8080"
+        proto: tcp
+      tags: [port]
+
+    - name: "UFW - Allow HTTP on port 8880"
+      ufw:
+        rule: allow
+        port: "8880"
+        proto: tcp
+      tags: [port]
 
 # WordPress Configuration
     - name: Download and unpack latest WordPress
       unarchive:
         src: https://wordpress.org/latest.tar.gz
-        dest: "/var/www/{{ http_host }}"
+        dest: "/var/www/{{ item.domain }}"
         remote_src: yes
-        creates: "/var/www/{{ http_host }}/wordpress"
+        creates: "/var/www/{{ item.domain}}/wordpress"
+      with_items: 
+      - {domain: client1.com, user: client1}
+      - {domain: client2.com, user: client2}
+      - {domain: client3.com, user: client3} 
       tags: [ wordpress ]
 
     - name: Set ownership
       file:
-        path: "/var/www/{{ http_host }}"
+        path: "/var/www/{{ item.domain }}"
         state: directory
         recurse: yes
-        owner: www-data
-        group: www-data
+        owner: "{{ item.user }}"
+      with_items: 
+      - {domain: client1.com, user: client1}
+      - {domain: client2.com, user: client2}
+      - {domain: client3.com, user: client3} 
       tags: [ wordpress ]
 
     - name: Set permissions for directories
-      shell: "/usr/bin/find /var/www/{{ http_host }}/wordpress/ -type d -exec chmod 750 {} \\;"
+      shell: "/usr/bin/find /var/www/{{ item.domain }}/wordpress/ -type d -exec chmod 750 {} \\;"
+      with_items: 
+      - {domain: client1.com, user: client1}
+      - {domain: client2.com, user: client2}
+      - {domain: client3.com, user: client3} 
       tags: [ wordpress ]
 
     - name: Set permissions for files
-      shell: "/usr/bin/find /var/www/{{ http_host }}/wordpress/ -type f -exec chmod 640 {} \\;"
+      shell: "/usr/bin/find /var/www/{{ item.domain }}/wordpress/ -type f -exec chmod 640 {} \\;"
+      with_items: 
+      - {domain: client1.com, user: client1}
+      - {domain: client2.com, user: client2}
+      - {domain: client3.com, user: client3} 
       tags: [ wordpress ]
 
     - name: Set up wp-config
       template:
-        src: "files/wp-config.php.j2"
-        dest: "/var/www/{{ http_host }}/wordpress/wp-config.php"
+        src: "{{item.src}}"
+        dest: "{{item.dest}}"
+      with_items:
+        - { src: 'files/wp-config.php.client1.j2', dest: "/var/www/client1.com/wordpress/wp-config.php" }
+        - { src: 'files/wp-config.php.client2.j2', dest: "/var/www/client2.com/wordpress/wp-config.php" }
+        - { src: 'files/wp-config.php.client3.j2', dest: "/var/www/client3.com/wordpress/wp-config.php" }
       tags: [ wordpress ]
 
   handlers:
