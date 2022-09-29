@@ -1,0 +1,18 @@
+- hosts: syslog
+  become: true
+  tasks:
+   - name: Installation RSyslog
+     apt:
+      name: rsyslog
+      state: present
+
+   - name: Activation service RSyslog au démarrage du système
+     ansible.builtin.service:
+      name: rsyslog
+      enabled: yes
+   
+   - name: Configuration RSyslog
+     template:
+       src: syslogconf.j2
+       dest: /etc/rsyslog.conf
+     notify: restart syslog
