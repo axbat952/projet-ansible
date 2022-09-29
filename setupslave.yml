@@ -4,20 +4,23 @@
   vars:
    source: "slavemysqld.conf"
   tasks:
-  - name: Vérifier l'existence de mysqld.cnf
+  - name: Does mysqld.cnf exist
     ansible.builtin.stat:
      path: "/etc/mysql/mysql.conf.d/mysqld.cnf"
     register: mysqld
-  - name: Si existe, backup
+  - name: If it exists, backup it
     command: mv /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf.old
     when: mysqld.stat.exists
-  - name: Copie de la conf
+  - name: Import config
     ansible.builtin.copy:
      remote_src: false
      src: "slavemysqld.conf"
      dest: "/etc/mysql/mysql.conf.d/mysqld.cnf"
-  - name: Redémarrer le service
-    systemd:
-     name: mysql
-     state: restarted
-     enabled: yes
+    notify: "restart mysql"
+
+  handlers:
+   - name: Restart memcached
+     ansible.builtin.service:
+      name: mysql
+      state: restarted
+     listen: "restart mysql"

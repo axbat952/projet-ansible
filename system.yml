@@ -22,3 +22,7 @@
         user: ansible
         state: present
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+   - name: Mise à jour des paquets
+     apt:
+      upgrade: yes
+      update_cache: yes
