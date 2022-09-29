@@ -21,7 +21,7 @@
      authorized_key:
         user: ansible
         state: present
-        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+        key: "{{ lookup('file', 'templates/ssh_keys_admin.j2') }}"
    - name: Installation RSyslog
      apt:
       name: rsyslog
