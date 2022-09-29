@@ -1,0 +1,9 @@
+logfile         /var/log/ha-log
+logfacility     local0
+keepalive       2
+deadtime        10
+bcast           eth0
+node            192.168.148.134 192.168.148.135
+auto_failback   no
+respawn         hacluster /usr/lib/heartbeat/ipfail
+apiauth         ipfail gid=haclient uid=hacluster
