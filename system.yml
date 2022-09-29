@@ -1,7 +1,8 @@
-- hosts: all
+- hosts: web
   become: yes
   tasks:
-   - name: Création utilisateur ansible
+
+   - name: Add User ansible for SSH
      user:
        name: ansible 
        groups:
@@ -11,35 +12,30 @@
        system: no             
        createhome: yes       
        home: /home/ansible
+
    - name: Pas de mot de passe SUDO
      template:
        src: ansible.j2
        dest: /etc/sudoers.d/ansible
        owner: root
        group: root
+
    - name: Transfert clé publique SSH
      authorized_key:
         user: ansible
         state: present
-        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}" 
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
+   - name: Update the /etc/hosts file with node name
+     lineinfile:
+        path: "/etc/hosts"
+        regexp: ".*\t{{ hostvars[item]['ansible_hostname']}}\t{{ hostvars[item]['ansible_hostname']}}"
+        line: "{{ hostvars[item]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}\t{{ hostvars[item]['ansible_hostname']}}\t{{ hostvars[item]['ansible_hostname']}}"
+        state: present
+        backup: yes
+     register: etchostsupdate
+     when: ansible_hostname != "{{ item }}" or ansible_hostname == "{{ item }}"
+     with_items: "{{groups['multi']}}"
+     tags: [dns]
 
----
-
-- name: ajout user
-  hosts: web
-  gather_facts: false
-  vars_files:
-    - Vault/password.yml
-    - WordPress_LAMP/vars/user_vars.yml
-
-  tasks:
-    - name: Ajout user apache avec password Vault
-      ansible.builtin.user:
-        name: "{{item.username}}"
-        password: "{{item.password}}"
-        comment: "{{item.username}}"
-        home: "{{item.home}}"
-        update_password : on_create
-      with_items:
-        - "{{client}}"
+  
