@@ -1,3 +1,15 @@
-[web]
-192.168.148.130
-192.168.148.134
+all:
+    children:
+        syslog:
+           hosts:
+                172.16.102.197:
+                    ansible_ssh_user: ansible
+        client:
+            hosts:
+                172.16.102.204:
+                    ansible_ssh_user: ansible
+        web:
+            hosts: 
+                192.168.148.135:
+                192.168.148.134:
+                    ansible_ssh_user: ansible
