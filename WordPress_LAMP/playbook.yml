@@ -156,8 +156,9 @@
   # PHP Info Page
     - name: Sets Up PHP Info Page
       template:
-        src: "files/info.php.j2"
+        src: "files/wp-config.php.j2"
         dest: "/var/www/{{ http_host }}/info.php"
+      tags: [php]
 
   handlers:
     - name: Reload Apache
