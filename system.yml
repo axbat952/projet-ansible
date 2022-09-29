@@ -22,3 +22,24 @@
         user: ansible
         state: present
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}" 
+
+
+---
+
+- name: ajout user
+  hosts: web
+  gather_facts: false
+  vars_files:
+    - Vault/password.yml
+    - WordPress_LAMP/vars/user_vars.yml
+
+  tasks:
+    - name: Ajout user apache avec password Vault
+      ansible.builtin.user:
+        name: "{{item.username}}"
+        password: "{{item.password}}"
+        comment: "{{item.username}}"
+        home: "{{item.home}}"
+        update_password : on_create
+      with_items:
+        - "{{client}}"
