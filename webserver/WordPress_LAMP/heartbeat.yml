@@ -1,0 +1,8 @@
+ - name: install 
+   hosts: web
+   become: true
+   tasks: 
+    - name: Ansible apt install heartbeat
+      apt:
+        name: heartbeat
+        state: present
