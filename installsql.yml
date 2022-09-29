@@ -2,10 +2,6 @@
 - hosts: all
   become: true
   tasks:
-  - name: Mise à jour des paquets
-    apt:
-     upgrade: yes
-     update_cache: yes
   - name: Installation de SQL8
     apt:
      name:
