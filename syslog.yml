@@ -20,8 +20,4 @@
      template:
        src: syslogconf.j2
        dest: /etc/rsyslog.conf
-   
-   - name: Redémarrage service RSyslog
-     ansible.builtin.service:
-      name: rsyslog
-      state: restarted
+     notify: restart syslog
