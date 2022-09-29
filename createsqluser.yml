@@ -3,7 +3,7 @@
   become: true
   tasks:
   - name: Check les mdp root & allouer les droits replication
-    mysql_user:
+    community.mysql.mysql_user:
     name: root
     host: "{{ item }}"
     login_unix_socket: /var/run/mysqld/mysqld.sock
@@ -28,7 +28,7 @@
     notify: "restart mysql"
 
   handlers:
-   - name: Restart memcached
+   - name: Restart mysql
      ansible.builtin.service:
       name: mysql
       state: restarted

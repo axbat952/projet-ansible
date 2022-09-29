@@ -19,7 +19,7 @@
     notify: "restart mysql"
 
   handlers:
-   - name: Restart memcached
+   - name: Restart mysql
      ansible.builtin.service:
       name: mysql
       state: restarted
