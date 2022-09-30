@@ -31,3 +31,8 @@
      ansible.builtin.service:
         name: heartbeat
         state: restarted
+   
+   - name: Change html page
+     template:
+       src: templates/index.html.j2
+       dest: /var/www/html/index.html
