@@ -51,8 +51,14 @@ To create an user :
     
   
   
-  HeartBeat:
   
+  HeartBeat.yml:
+
+- Installation Apache2
+- Installation HeartBeat + config
+- Change index.html
+
+Setup :
   Change ip and interface in :
     - templates/hacf.j2
     - haressources.j2
