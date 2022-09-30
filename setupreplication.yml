@@ -1,0 +1,25 @@
+---
+- hosts: master,slave
+  become: true
+  vars_files:
+    - hosts.yml
+  tasks:
+    - name: Get file value from Master
+      become: yes
+      command: mysql -e 'SHOW MASTER STATUS\G' | grep 'File' | cut -d ":" -f2
+      register: file
+      when: ("{{ replica_id }}" == '1')
+      with_items: "{{ replica_id }}"
+    - name: Get position value from Master
+      become: yes
+      command: mysql -e 'SHOW MASTER STATUS\G' | grep 'Position' | cut -d ":" -f2
+      register: position
+      when: ("{{ replica_id }}" == '1')
+      with_items: "{{ replica_id }}"
+    
+    
+    - name: Setting up replication
+      become: yes
+      command: mysql -e 'CHANGE MASTER TO MASTER_HOST='172.16.102.192', MASTER_USER='olivier', MASTER_PASSWORD='12345', MASTER_LOG_FILE="{{ file.stdout }}", MASTER_LOG_POS="{{ position.stdout }}";'
+      when: ("{{ replica_id }}" == '2')
+      with_items: "{{ replica_id }}"

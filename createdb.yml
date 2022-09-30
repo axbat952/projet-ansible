@@ -1,0 +1,21 @@
+---
+- hosts: master
+  become: true
+  tasks: 
+    - name: Create a new database  
+      mysql_db: 
+       name: testdb
+       state: present
+       login_user: ansible
+       login_password: '12345'  
+    - name: Add sample data to database  
+      copy: 
+       src: dump.sql
+       dest: /tmp/dump.sql  
+    - name: Insert sample data into database  
+      mysql_db: 
+         name: testdb
+         state: import 
+         target: /tmp/dump.sql
+         login_user: ansible
+         login_password: '12345'

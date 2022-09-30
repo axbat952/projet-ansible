@@ -1,6 +1,10 @@
 - hosts: all
   become: yes
   tasks:
+   - name: Mise à jour des paquets
+     apt:
+      upgrade: yes
+      update_cache: yes
    - name: Création utilisateur ansible
      user:
        name: ansible 
@@ -17,11 +21,11 @@
        dest: /etc/sudoers.d/ansible
        owner: root
        group: root
-   - name: Transfert clé publique SSH
-     authorized_key:
-        user: ansible
-        state: present
-        key: "{{ lookup('file', 'ssh/ssh_keys_admin.j2') }}"
+   - name: Mise à jour des paquets
+     apt:
+      upgrade: yes
+      update_cache: yes
+        key: "{{ lookup('file', 'templates/ssh_keys_admin.j2') }}"
    - name: Installation RSyslog
      apt:
       name: rsyslog
@@ -33,7 +37,7 @@
    - name: Activation service RSyslog au démarrage du système
      ansible.builtin.service:
       name: rsyslog
-      enabled: yes  
+      enabled: yes
    - name: Configuration RSyslog
      template:
        src: templates/syslogconfclient.j2

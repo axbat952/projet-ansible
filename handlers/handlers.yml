@@ -3,3 +3,9 @@
   service: 
    name: rsyslog 
    state: restarted
+
+- name: restart mysql
+  service:
+   name: mysql
+   state: restarted
+  listen: "restart mysql"

@@ -1,0 +1,26 @@
+---
+- hosts: slave
+  become: true
+  vars:
+   source: "slavemysqld.conf"
+  tasks:
+  - name: Does mysqld.cnf exist
+    ansible.builtin.stat:
+     path: "/etc/mysql/mysql.conf.d/mysqld.cnf"
+    register: mysqld
+  - name: If it exists, backup it
+    command: mv /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf.old
+    when: mysqld.stat.exists
+  - name: Import config
+    ansible.builtin.copy:
+     remote_src: false
+     src: "slavemysqld.conf"
+     dest: "/etc/mysql/mysql.conf.d/mysqld.cnf"
+    notify: "restart mysql"
+
+  handlers:
+   - name: Restart mysql
+     ansible.builtin.service:
+      name: mysql
+      state: restarted
+     listen: "restart mysql"
