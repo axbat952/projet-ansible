@@ -12,7 +12,7 @@
          host: 127.0.0.1
          login_unix_socket: /var/run/mysqld/mysqld.sock
          password: root
-         priv: "*.*:ALL"
+         priv: "*.*:ALL,GRANT"
          check_implicit_admin: true
          state: present
         loop: "{{ mysql }}"
@@ -36,7 +36,7 @@
         community.mysql.mysql_user:
          name: olivier
          password: "12345"
-         priv: "*.*:ALL"
+         priv: "*.*:ALL,GRANT"
          state: present
 
         
