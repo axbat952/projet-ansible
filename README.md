@@ -1,6 +1,8 @@
 # Projet-Ansible
 
-Start :
+Start : Modify Host file in Ansible Host
+- Add in file 
+  - {{IP_Server}} {{DNS}}
 
 # System.yml
 
