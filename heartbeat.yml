@@ -1,0 +1,33 @@
+- hosts: web
+  become: yes
+  tasks:
+   - name: Installation Apache2
+     apt:
+      name: apache2
+      state: present
+   - name: Installation Heartbeat
+     apt:
+      name: heartbeat
+      state: present
+   - name: Configuration HA.CF
+     template:
+       src: templates/hacf.j2
+       dest: /etc/ha.d/ha.cf
+       mode: '600'
+   - name: Configuration Authkeys
+     template:
+       src: templates/authkeys.j2
+       dest: /etc/ha.d/authkeys
+       mode: '600'
+   - name: Configuration HA Ressources
+     template:
+       src: templates/haresources.j2
+       dest: /etc/ha.d/haresources
+   - name: Restart service apache2
+     ansible.builtin.service:
+        name: apache2
+        state: restarted
+   - name: Restart service heartbeat
+     ansible.builtin.service:
+        name: heartbeat
+        state: restarted
