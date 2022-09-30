@@ -1,5 +1,16 @@
 # projet-ansible
 
+Start :
+
+ansible-playbook system.yml -i host.yml
+
+- share ssh key
+- Add user ansible with sudo right to execute playbook
+- update package in server
+- Installation rsyslog and enable this
+- Add server in syslog server to centralize logs
+- Dynamic host file
+
 Database setup : (Olivier)
 
 - To install MySQL service on both DB servers, execute : 
