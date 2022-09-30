@@ -1,6 +1,8 @@
-# projet-ansible
+# Projet-Ansible
 
 Start :
+
+# System.yml
 
 ansible-playbook system.yml -i host.yml
 
@@ -11,7 +13,7 @@ ansible-playbook system.yml -i host.yml
 - Add server in syslog server to centralize logs
 - Dynamic host file
 
-Database setup : (Olivier)
+# Database setup : (Olivier)
 
 - To install MySQL service on both DB servers, execute : 
 ansible-playbook -i hosts.yml installsql.yml -kK
@@ -26,14 +28,14 @@ ansible-playbook -i hosts.yml createdb.yml -kK
 ansible-playbook -i hosts.yml setupreplication.yml -kK
 
 
-Syslog Setup:
+# Syslog Setup:
 
 1 - Launch ansible-playbook -i hosts.yml syslog.yml -kK
 
 2 - To configure a server to communicate with syslog, execute : ansible-playbook -i hosts.yml system.yml -kK
 
 
-User Client :
+# User Client :
 
 To create an user :
   
@@ -52,7 +54,7 @@ To create an user :
   
   
   
-  HeartBeat.yml:
+# HeartBeat.yml:
 
 - Installation Apache2
 - Installation HeartBeat + config
