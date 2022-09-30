@@ -34,7 +34,7 @@
       - name: Create user with replication rights
         become: yes
         community.mysql.mysql_user:
-         name: olivier
+         name: ansible
          password: "12345"
          priv: "*.*:ALL,GRANT"
          state: present

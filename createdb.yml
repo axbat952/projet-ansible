@@ -6,7 +6,7 @@
       mysql_db: 
        name: testdb
        state: present
-       login_user: olivier
+       login_user: ansible
        login_password: '12345'  
     - name: Add sample data to database  
       copy: 
@@ -17,5 +17,5 @@
          name: testdb
          state: import 
          target: /tmp/dump.sql
-         login_user: olivier
+         login_user: ansible
          login_password: '12345'
