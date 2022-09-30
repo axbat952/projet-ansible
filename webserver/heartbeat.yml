@@ -1,5 +1,0 @@
-- name: heartbeat
-  hosts: web
-  gather_facts: yes
-  roles:
-    - apolloclark.heartbeat
