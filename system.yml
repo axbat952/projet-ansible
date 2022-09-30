@@ -21,36 +21,32 @@
        dest: /etc/sudoers.d/ansible
        owner: root
        group: root
-   - name: Transfert clé publique SSH
-     authorized_key:
-        user: ansible
-        state: present
-<<<<<<< HEAD
-        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
    - name: Mise à jour des paquets
      apt:
       upgrade: yes
       update_cache: yes
-=======
         key: "{{ lookup('file', 'templates/ssh_keys_admin.j2') }}"
    - name: Installation RSyslog
      apt:
       name: rsyslog
       state: present
-
    - name: Démarrage service RSyslog si non démarré
      ansible.builtin.service:
       name: rsyslog
       state: started
-
    - name: Activation service RSyslog au démarrage du système
      ansible.builtin.service:
       name: rsyslog
       enabled: yes
-
    - name: Configuration RSyslog
      template:
        src: templates/syslogconfclient.j2
        dest: /etc/rsyslog.conf
      notify: restart rsyslog
->>>>>>> c0863b3bae4e53f5f413f6c4ecbb9e8def8de7ad
+   - name: Build hosts file
+     lineinfile:
+      dest: /etc/hosts
+      regexp: '.*{{ item }}$'
+      line: '{{ hostvars[item].ansible_default_ipv4.address }} {{item}}'
+      state: present
+     with_items: '{{ groups["all"] }}'
