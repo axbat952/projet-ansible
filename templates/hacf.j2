@@ -1,0 +1,11 @@
+debugfile /var/log/ha-debug
+logfile /var/log/ha-log/ha-debug
+keepalive 2
+deadtime 5
+warntime 4
+initdead 15
+udpport 694
+ucast enp0s3 172.16.102.51
+ucast enp0s3 172.16.102.35
+auto_failback on
+node web1 web2
