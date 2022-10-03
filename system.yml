@@ -21,10 +21,6 @@
        dest: /etc/sudoers.d/ansible
        owner: root
        group: root
-   - name: Mise à jour des paquets
-     apt:
-      upgrade: yes
-      update_cache: yes
    - name: Transfert clé publique SSH
      authorized_key:
       user: ansible
